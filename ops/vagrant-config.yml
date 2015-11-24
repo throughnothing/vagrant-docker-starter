@@ -1,0 +1,20 @@
+user_defaults:
+  box:
+    memory: 2048
+    cpus: 1
+    gui: false
+    ports:
+      -
+        guest: 5432
+        host:  5433
+
+containers:
+  -
+    name: postgres
+    image: postgres:9.4
+    ports:
+      - 5432:5432
+    env:
+      POSTGRES_USER: pg_user
+      POSTGRES_PASSWORD: pg_pass
+      POSTGRES_DB: testdb

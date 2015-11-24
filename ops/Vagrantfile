@@ -1,0 +1,95 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+vagrant_config = YAML.load_file('vagrant-config.yml')
+
+puts vagrant_config
+ 
+unless Vagrant.has_plugin?('nugrant')
+  warn "ERROR: Please run: vagrant plugin install nugrant"
+  exit -1
+end
+
+Vagrant.configure(2) do |config|
+
+  config.user.defaults = vagrant_config['user_defaults']
+
+  # Set up docker containers
+  vagrant_config['containers'].each do |node|
+    config.vm.define node['name'] do |cont|
+      cont.vm.synced_folder ".", "/vagrant", disabled: true
+      cont.vm.provider "docker" do |docker|
+        # Attach each docker container to docker-host defined below
+        docker.force_host_vm = true
+        docker.vagrant_vagrantfile = "./Vagrantfile"
+        docker.vagrant_machine = "docker-host"
+
+        docker.name = node['name']
+        docker.image = node['image']
+
+        if node['volumes']
+          docker.volumes = node['volumes']
+        end
+
+        if node['env']
+          docker.env = node['env']
+        end
+
+        if node['ports']
+          docker.ports = node['ports']
+        end
+
+        if node['cmd']
+          docker.cmd = node['cmd']
+        end
+
+        if node['build_dir']
+          docker.build_dir = node['build_dir']
+        end
+
+        if node['dockerfile']
+          docker.dockerfile = node['dockerfile']
+        end
+
+        if node['links']
+          node['links'].each do |link|
+            docker.link(link)
+          end
+        end
+      end
+    end
+  end
+
+
+  # docker-host machine
+  # This is the Main VM that will run all the docker containers
+  config.vm.define "docker-host" do |dh|
+    dh.vm.hostname = "docker-host"
+    dh.vm.box = "ubuntu/trusty64"
+    dh.ssh.insert_key = false
+
+    dh.vm.provision "docker"
+    # Assumes its running from ops/
+    dh.vm.synced_folder "../", "/vagrant"
+
+    dh.vm.provider "virtualbox" do |vb|
+      vb.gui = config.user.box.gui
+      vb.memory = config.user.box.memory
+      vb.cpus = config.user.box.cpus
+    end
+
+    #config.user.box.ports.each do |port|
+      #config.vm.network "forwarded_port", guest: port.guest, host: port.host
+    #end
+
+    # The following line terminates all ssh connections. Therefore
+    # Vagrant will be forced to reconnect.
+    # That's a workaround to have the docker command in the PATH and
+    # add Vagrant to the docker group by logging in/out
+    config.vm.provision "shell", :inline =>
+      "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
+  end
+
+end
+
