@@ -41,15 +41,22 @@ vagrant halt docker-host
 
 # Structure
 
-By default, the `Vagrantfile` is placed in the repository root, but this can
-be moved.  Some people like to put it in the `ops/` directory, to keep the
-root uncluttered.  Either way is fine, but if you move the `Vagrantfile` from
-the root, you'll have to update the pointer to the `vagrant-config.yml` at the
-top of the `Vagrantfile`.
+By default, the `Vagrantfile` and it's config `YAML` file are placed in the
+`ops/` directory, to keep the root uncluttered.  These files can be moved
+anywhere, but if you move the `Vagrantfile`, you may have to update the path
+to the `vagrant-config.yml`.  Additionally, moving where the `Vagrantfile` is
+will change what directory you have to run your `vagrant` commands from.
 
-You should not have to modify the `Vagrantfile`, as most of the configuration
-for both the `docker-host` and all of your containers can be kept in the
-`vagrant-config.yml` file, which, by default, resides in the `ops/` directory.
+The `ops/` directory is also the place where you can add directories and files
+needed to provision your `docker-host`, and for docker config files or scripts
+needed to build images for your particular project.  We find it's best to
+keep these out of your project root, and the `ops/` directory seems suited
+for this.
+
+You should ideally not have to modify the `Vagrantfile`, as most of the
+configuration for both the `docker-host` and all of your containers can be
+kept in the `vagrant-config.yml` file, which, by default, resides in the
+`ops/` directory.
 
 ## vagrant-config.yml
 
@@ -108,3 +115,5 @@ switch your work over!
 # TODO
 
 * Ordering of how containers come up would be nice
+* Make it easy to provision the `docker-host` with `:shell`, `:chef\_solo`,
+  `:ansible`, etc.
