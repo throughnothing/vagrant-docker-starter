@@ -1,20 +1,48 @@
-user_defaults:
+# docker-host defaults
+# Can be changed here in the config, or also overwritten on a
+# per-user basis via nugrant (https://github.com/maoueh/nugrant)
+docker_host:
   box:
     memory: 2048
     cpus: 1
     gui: false
     ports:
+      # Forward Postgres to localhost
       -
         guest: 5432
-        host:  5433
+        host:  5432
+      # Forward Redis to localhost
+      -
+        guest: 6379
+        host:  6379
 
+
+# docker-compose compatible Docker Container descriptions
 containers:
-  -
-    name: postgres
+  # PostgreSQL 9.4 Docker Container
+  # https://hub.docker.com/_/postgres/
+  postgres:
     image: postgres:9.4
     ports:
       - 5432:5432
-    env:
+    environment:
       POSTGRES_USER: pg_user
       POSTGRES_PASSWORD: pg_pass
       POSTGRES_DB: testdb
+
+  # Cassandra Docker Container
+  # https://hub.docker.com/_/cassandra/
+  cassandra:
+    image: cassandra:latest
+    ports:
+      - 7000:7000
+      - 9160:9160
+      - 9042:9042
+      - 7199:7199
+
+  # Redis Docker Container
+  # https://hub.docker.com/_/redis/
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379

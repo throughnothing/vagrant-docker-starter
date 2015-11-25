@@ -1,11 +1,6 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 require 'yaml'
 vagrant_config = YAML.load_file('vagrant-config.yml')
 
-puts vagrant_config
- 
 unless Vagrant.has_plugin?('nugrant')
   warn "ERROR: Please run: vagrant plugin install nugrant"
   exit -1
@@ -13,27 +8,37 @@ end
 
 Vagrant.configure(2) do |config|
 
-  config.user.defaults = vagrant_config['user_defaults']
+  config.user.defaults = vagrant_config['docker_host']
 
   # Set up docker containers
-  vagrant_config['containers'].each do |node|
-    config.vm.define node['name'] do |cont|
+  vagrant_config['containers'].keys.each do |name|
+    config.vm.define name do |cont|
       cont.vm.synced_folder ".", "/vagrant", disabled: true
       cont.vm.provider "docker" do |docker|
+        node = vagrant_config['containers'][name]
+
         # Attach each docker container to docker-host defined below
         docker.force_host_vm = true
         docker.vagrant_vagrantfile = "./Vagrantfile"
         docker.vagrant_machine = "docker-host"
+        docker.name = name
 
-        docker.name = node['name']
-        docker.image = node['image']
+        if node['links']
+          node['links'].each do |link|
+            docker.link(link)
+          end
+        end
+
+        if node['image']
+          docker.image = node['image']
+        end
 
         if node['volumes']
           docker.volumes = node['volumes']
         end
 
-        if node['env']
-          docker.env = node['env']
+        if node['environment']
+          docker.env = node['environment']
         end
 
         if node['ports']
@@ -50,12 +55,6 @@ Vagrant.configure(2) do |config|
 
         if node['dockerfile']
           docker.dockerfile = node['dockerfile']
-        end
-
-        if node['links']
-          node['links'].each do |link|
-            docker.link(link)
-          end
         end
       end
     end
@@ -79,9 +78,9 @@ Vagrant.configure(2) do |config|
       vb.cpus = config.user.box.cpus
     end
 
-    #config.user.box.ports.each do |port|
-      #config.vm.network "forwarded_port", guest: port.guest, host: port.host
-    #end
+    config.user.box.ports.each do |port|
+      config.vm.network "forwarded_port", guest: port.guest, host: port.host
+    end
 
     # The following line terminates all ssh connections. Therefore
     # Vagrant will be forced to reconnect.
@@ -92,4 +91,7 @@ Vagrant.configure(2) do |config|
   end
 
 end
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
