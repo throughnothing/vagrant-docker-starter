@@ -8,7 +8,11 @@ in your deployments, as well as your development environment.
 The templates within provide a standard (but opinionated) way to have a
 `docker-host` Vagrant machine which can run, orchestrate, and link
 various Docker containers, including your app, and any other services
-(PostgreSQL, Redis, etc.) it may depend on.
+(PostgreSQL, Redis, etc.) it may depend on. A `docker-host` machine is used
+to guarantee consistency (often certain things will need to be provisioned on
+the host, and it's best to keep this isolated and off your local OS), and also
+to ensure that it works across platforms (notably OSX) that may not support
+docker natively.
 
 # Quick Start
 
