@@ -41,7 +41,34 @@ vagrant halt docker-host
 
 # Structure
 
-# Using Vagrant Docker Starter
+By default, the `Vagrantfile` is placed in the repository root, but this can
+be moved.  Some people like to put it in the `ops/` directory, to keep the
+root uncluttered.  Either way is fine, but if you move the `Vagrantfile` from
+the root, you'll have to update the pointer to the `vagrant-config.yml` at the
+top of the `Vagrantfile`.
+
+You should not have to modify the `Vagrantfile`, as most of the configuration
+for both the `docker-host` and all of your containers can be kept in the
+`vagrant-config.yml` file, which, by default, resides in the `ops/` directory.
+
+## vagrant-config.yml
+
+The `vagrant-config.yml` contains 2 main sections:
+[Docker_host](#docker_host) and [Containers](#containers).
+
+### docker\_host
+
+The `docker\_host` section allows you to customize the memory, cpus, and 
+ports forwarded to the host machine.
+
+### containers
+
+You specify your docker containers the `vagrant-config.yml` file under the
+`containers` section.  The general format inside the `containers` section
+matches the [docker-compose](https://docs.docker.com/compose/compose-file/)
+file format as closely as possible.
+
+# Using Vagrant Docker Starter in your project
 
 You can create a new project directory from the templates here pretty easily
 with `git-archive` using the following:

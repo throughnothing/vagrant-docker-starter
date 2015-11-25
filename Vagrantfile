@@ -10,7 +10,40 @@ Vagrant.configure(2) do |config|
 
   config.user.defaults = vagrant_config['docker_host']
 
+  # docker-host machine
+  # This is the Main VM that will run all the docker containers
+  config.vm.define "docker-host" do |dh|
+    dh.vm.hostname = "docker-host"
+    dh.vm.box = "ubuntu/trusty64"
+    dh.ssh.insert_key = false
+
+    dh.vm.provision "docker"
+    # Assumes its running from ops/
+    dh.vm.synced_folder "../", "/vagrant"
+
+    dh.vm.provider "virtualbox" do |vb|
+      vb.gui = config.user.gui
+      vb.memory = config.user.memory
+      vb.cpus = config.user.cpus
+    end
+
+    # Set up configured ports to forward to localhost machine
+    config.user.ports.each do |port|
+      config.vm.network "forwarded_port", guest: port.guest, host: port.host
+    end
+
+    # The following line terminates all ssh connections. Therefore
+    # Vagrant will be forced to reconnect.
+    # That's a workaround to have the docker command in the PATH and
+    # add Vagrant to the docker group by logging in/out
+    config.vm.provision "shell", :inline =>
+      "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
+  end
+
+
   # Set up docker containers
+  # You can setup your docker containers in the `vagrant-config.yml`
+  # and generally should not need to modify this section
   vagrant_config['containers'].keys.each do |name|
     config.vm.define name do |cont|
       cont.vm.synced_folder ".", "/vagrant", disabled: true
@@ -58,36 +91,6 @@ Vagrant.configure(2) do |config|
         end
       end
     end
-  end
-
-
-  # docker-host machine
-  # This is the Main VM that will run all the docker containers
-  config.vm.define "docker-host" do |dh|
-    dh.vm.hostname = "docker-host"
-    dh.vm.box = "ubuntu/trusty64"
-    dh.ssh.insert_key = false
-
-    dh.vm.provision "docker"
-    # Assumes its running from ops/
-    dh.vm.synced_folder "../", "/vagrant"
-
-    dh.vm.provider "virtualbox" do |vb|
-      vb.gui = config.user.box.gui
-      vb.memory = config.user.box.memory
-      vb.cpus = config.user.box.cpus
-    end
-
-    config.user.box.ports.each do |port|
-      config.vm.network "forwarded_port", guest: port.guest, host: port.host
-    end
-
-    # The following line terminates all ssh connections. Therefore
-    # Vagrant will be forced to reconnect.
-    # That's a workaround to have the docker command in the PATH and
-    # add Vagrant to the docker group by logging in/out
-    config.vm.provision "shell", :inline =>
-      "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
   end
 
 end

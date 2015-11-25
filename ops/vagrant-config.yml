@@ -2,19 +2,18 @@
 # Can be changed here in the config, or also overwritten on a
 # per-user basis via nugrant (https://github.com/maoueh/nugrant)
 docker_host:
-  box:
-    memory: 2048
-    cpus: 1
-    gui: false
-    ports:
-      # Forward Postgres to localhost
-      -
-        guest: 5432
-        host:  5432
-      # Forward Redis to localhost
-      -
-        guest: 6379
-        host:  6379
+  memory: 2048
+  cpus: 1
+  gui: false
+  ports:
+    # Forward Postgres to localhost
+    -
+      guest: 5432
+      host:  5432
+    # Forward Redis to localhost
+    -
+      guest: 6379
+      host:  6379
 
 
 # docker-compose compatible Docker Container descriptions
