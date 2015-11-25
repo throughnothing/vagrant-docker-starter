@@ -37,6 +37,11 @@ vagrant halt redis postgres
 
 # Shut down the docker-host VM
 vagrant halt docker-host
+
+# Start all containers (in order)
+# If your containers use links, you'll need to use --no-parallel
+# To ensure they are started sequentially
+vagrant up --no-parallel
 ```
 
 # Structure
