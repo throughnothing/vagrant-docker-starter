@@ -122,3 +122,7 @@ switch your work over!
 * Ordering of how containers come up would be nice
 * Make it easy to provision the `docker-host` with `:shell`, `:chef\_solo`,
   `:ansible`, etc.
+
+# LICENSE
+
+Public Domain, of course.
